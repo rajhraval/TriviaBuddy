@@ -5,6 +5,7 @@
 //  Created by Raj Raval on 28/01/24.
 //
 
+import Combine
 import UIKit
 
 class HomeViewController: TBCollectionViewController {
@@ -12,7 +13,10 @@ class HomeViewController: TBCollectionViewController {
     typealias ViewModel = HomeViewModel
 
     private var viewModel: ViewModel!
+    
     private var categories: [Category] = []
+
+
     private var selectedQuestionIndexPath: IndexPath?
     private var difficultyQuestionIndexPath: IndexPath?
     private var answerTypeQuestionIndexPath: IndexPath?
@@ -21,6 +25,7 @@ class HomeViewController: TBCollectionViewController {
         super.init()
         self.viewModel = viewModel
         bind()
+        NotificationCenter.default.addObserver(self, selector: #selector(resetValues), name: .resetValues, object: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -33,9 +38,10 @@ class HomeViewController: TBCollectionViewController {
         
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    @objc
+    private func resetValues(_ notification: Notification) {
         viewModel.resetValues()
+        Log.info("Current Settings: Category: \(String(describing: viewModel.selectedCategory)), Difficulty: \(viewModel.selectedDifficulty), Answer Type: \(viewModel.selectedAnswerType), Questions: \(viewModel.selectedQuestions)")
     }
 
     override func setupView() {
@@ -89,7 +95,7 @@ class HomeViewController: TBCollectionViewController {
             let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
 
             section.boundarySupplementaryItems = [header]
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 24, bottom: 18, trailing: 24)
             return section
         }
         return layout
@@ -98,7 +104,7 @@ class HomeViewController: TBCollectionViewController {
 
     @objc
     private func startQuiz(_ sender: TBButton) {
-        let quizComponent = QuizComponent(questions: viewModel.selectedQuestions, category: 11, difficulty: viewModel.selectedDifficulty, type: viewModel.selectedAnswerType)
+        let quizComponent = QuizComponent(questions: viewModel.selectedQuestions, category: viewModel.selectedCategory, difficulty: viewModel.selectedDifficulty, type: viewModel.selectedAnswerType)
         let viewModel = QuizViewModel(quizComponent: quizComponent)
         let quizViewController = QuizViewController(viewModel: viewModel)
         present(quizViewController, animated: true)
@@ -139,7 +145,12 @@ extension HomeViewController {
         case .category:
             let cell: TBButtonCell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
             cell.itemButton.setupAccessibility(label: "Select Category", hint: "Select Category questions for the quiz.")
-            cell.configureButton("Select Category", color: .systemBlue)
+            cell.configureMenuButton("Select Category", color: .systemBlue, with: categories)
+            cell.didSelectCategory = { [weak self] categoryID in
+                guard let self = self else { return }
+                cell.itemButton.isSelected = true
+                viewModel.selectedCategory = categoryID
+            }
             return cell
         case .difficulty:
             let difficulties = Difficulty.allCases
@@ -153,7 +164,7 @@ extension HomeViewController {
                 difficultyQuestionIndexPath = indexPath
                 cell.itemButton.isSelected = true
                 let selectedDifficulty = difficulties[difficultyQuestionIndexPath?.item ?? 0]
-                viewModel.selectedDifficulty = selectedDifficulty.value
+                viewModel.selectedDifficulty = selectedDifficulty.rawValue
             }
             return cell
         case .type:

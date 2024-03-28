@@ -71,6 +71,7 @@ final class QuizViewController: TBQuizViewController {
     @objc
     private func dismissTapped(_ sender: TBButton) {
         dismiss(animated: true)
+        NotificationCenter.default.post(name: .resetValues, object: nil)
     }
 
 }

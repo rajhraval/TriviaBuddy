@@ -81,6 +81,7 @@ final class HomeViewModel: ObservableObject {
     @Published var sections: [HomeSection] = HomeSection.allCases
     @Published var categories: [Category] = []
 
+    @Published var selectedCategory: Int?
     @Published var selectedDifficulty: String = "easy"
     @Published var selectedAnswerType: String = "multiple"
     @Published var selectedQuestions: Int = 10
@@ -96,6 +97,7 @@ final class HomeViewModel: ObservableObject {
         selectedDifficulty = "easy"
         selectedAnswerType = "multiple"
         selectedQuestions = 10
+        selectedCategory = nil
     }
 
     func fetchCategories() {

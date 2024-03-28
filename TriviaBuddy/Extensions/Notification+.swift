@@ -8,5 +8,5 @@
 import Foundation
 
 extension NSNotification.Name {
-
+    static let resetValues = NSNotification.Name("resetValues")
 }

@@ -10,6 +10,7 @@ import UIKit
 final class TBButtonCell: UICollectionViewCell {
 
     var didSelectItem: (() -> Void)?
+    var didSelectCategory: ((Int) -> Void)?
 
     @UseAutoLayout
     private var containerView: UIView = {
@@ -33,6 +34,7 @@ final class TBButtonCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        itemButton.isSelected = false
         itemButton.prepareForReuse()
     }
 
@@ -62,5 +64,17 @@ final class TBButtonCell: UICollectionViewCell {
         itemButton.chipColor = color
     }
 
+    func configureMenuButton(_ title: String, color: UIColor, with items: [Category]) {
+        itemButton.title = title.showPlainString
+        itemButton.chipColor = color
+        let menuActions = items.map { item -> UIAction in
+            return UIAction(title: item.name, handler: { _ in
+                self.itemButton.title = item.name.showPlainString
+                self.didSelectCategory?(item.id)
+            })
+        }
+        itemButton.menu = UIMenu(children: menuActions)
+        itemButton.showsMenuAsPrimaryAction = true
+    }
 
 }
