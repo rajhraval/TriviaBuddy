@@ -13,7 +13,7 @@ final class QuizViewController: TBQuizViewController {
 
     private var viewModel: ViewModel!
     private var questions: [QuizItem] = []
-    private var questionIndex: Int = 0
+    private var questionIndex: Int = 1
 
     init(viewModel: ViewModel!) {
         super.init()
@@ -55,13 +55,16 @@ final class QuizViewController: TBQuizViewController {
 
     @objc
     private func actionTapped(_ sender: TBButton) {
-        sender.isSelected.toggle()
         if questionIndex <= questions.count - 1 {
             questionIndex += 1
+            goToNextQuestion()
         }
+    }
+
+    private func goToNextQuestion() {
         let newProgress = Float(questionIndex) / 10
         progressView.setProgress(newProgress, animated: true)
-        let indexPath = IndexPath(item: 0, section: questionIndex)
+        let indexPath = IndexPath(item: 0, section: questionIndex - 1)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
     }
 
@@ -87,7 +90,7 @@ extension QuizViewController {
         let cell: QuizCell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
         cell.sections = viewModel.sections
         cell.question = question
-        cell.didSelectItem = { [weak self] in
+        cell.didSelectItem = { [weak self] answer in
             guard let self = self else { return }
         }
         return cell

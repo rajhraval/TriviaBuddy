@@ -81,11 +81,21 @@ final class HomeViewModel: ObservableObject {
     @Published var sections: [HomeSection] = HomeSection.allCases
     @Published var categories: [Category] = []
 
+    @Published var selectedDifficulty: String = "easy"
+    @Published var selectedAnswerType: String = "multiple"
+    @Published var selectedQuestions: Int = 10
+
     private var categoryService: CategoryService!
 
     init(categoryService: CategoryService = CategoryService()) {
         self.categoryService = categoryService
         fetchCategories()
+    }
+
+    func resetValues() {
+        selectedDifficulty = "easy"
+        selectedAnswerType = "multiple"
+        selectedQuestions = 10
     }
 
     func fetchCategories() {

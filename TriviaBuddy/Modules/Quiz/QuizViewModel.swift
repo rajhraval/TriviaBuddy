@@ -50,9 +50,9 @@ enum QuizSection: Int {
     var groupHeight: NSCollectionLayoutDimension {
         switch self {
         case .question:
-            return .fractionalHeight(0.2)
+            return .estimated(200)
         default:
-            return .fractionalHeight(0.25)
+            return .estimated(150)
         }
     }
 }

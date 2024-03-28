@@ -13,7 +13,9 @@ class HomeViewController: TBCollectionViewController {
 
     private var viewModel: ViewModel!
     private var categories: [Category] = []
-    private var selectedIndexPath: IndexPath?
+    private var selectedQuestionIndexPath: IndexPath?
+    private var difficultyQuestionIndexPath: IndexPath?
+    private var answerTypeQuestionIndexPath: IndexPath?
 
     init(viewModel: ViewModel = HomeViewModel()) {
         super.init()
@@ -29,6 +31,11 @@ class HomeViewController: TBCollectionViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.resetValues()
     }
 
     override func setupView() {
@@ -91,7 +98,7 @@ class HomeViewController: TBCollectionViewController {
 
     @objc
     private func startQuiz(_ sender: TBButton) {
-        let quizComponent = QuizComponent(questions: 10, category: 11, difficulty: "easy", type: "multiple")
+        let quizComponent = QuizComponent(questions: viewModel.selectedQuestions, category: 11, difficulty: viewModel.selectedDifficulty, type: viewModel.selectedAnswerType)
         let viewModel = QuizViewModel(quizComponent: quizComponent)
         let quizViewController = QuizViewController(viewModel: viewModel)
         present(quizViewController, animated: true)
@@ -115,9 +122,18 @@ extension HomeViewController {
         let section = viewModel.sections[indexPath.section]
         switch section {
         case .questions:
-            let question = Questions.allCases[indexPath.item]
+            let questions = Questions.allCases
+            let question = questions[indexPath.item]
             let cell: TBButtonCell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
             cell.itemButton.setupAccessibility(label: "\(question.rawValue) questions", hint: "Select \(question.rawValue) questions for the quiz.")
+            cell.didSelectItem = { [weak self] in
+                guard let self = self else { return }
+                deselect(for: selectedQuestionIndexPath, indexPath: indexPath)
+                selectedQuestionIndexPath = indexPath
+                cell.itemButton.isSelected = true
+                let selectedQuestion = questions[selectedQuestionIndexPath?.item ?? 0]
+                viewModel.selectedQuestions = selectedQuestion.rawValue
+            }
             cell.configureButton("\(question.rawValue)", color: .systemIndigo)
             return cell
         case .category:
@@ -126,17 +142,42 @@ extension HomeViewController {
             cell.configureButton("Select Category", color: .systemBlue)
             return cell
         case .difficulty:
-            let difficulty = Difficulty.allCases[indexPath.item]
+            let difficulties = Difficulty.allCases
+            let difficulty = difficulties[indexPath.item]
             let cell: TBButtonCell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
             cell.configureButton(difficulty.display, color: .systemPink)
             cell.itemButton.setupAccessibility(label: "\(difficulty.rawValue) level for the quiz", hint: "Select difficulty of the questions for the quiz.")
+            cell.didSelectItem = { [weak self] in
+                guard let self = self else { return }
+                deselect(for: difficultyQuestionIndexPath, indexPath: indexPath)
+                difficultyQuestionIndexPath = indexPath
+                cell.itemButton.isSelected = true
+                let selectedDifficulty = difficulties[difficultyQuestionIndexPath?.item ?? 0]
+                viewModel.selectedDifficulty = selectedDifficulty.value
+            }
             return cell
         case .type:
-            let type = CategoryType.allCases[indexPath.item]
+            let categories = CategoryType.allCases
+            let type = categories[indexPath.item]
             let cell: TBButtonCell = collectionView.dequeueReusableCell(forIndexPath: indexPath)
             cell.configureButton(type.display, color: .systemGreen)
             cell.itemButton.setupAccessibility(label: "\(type.display)", hint: "Select type of the questions for the quiz.")
+            cell.didSelectItem = { [weak self] in
+                guard let self = self else { return }
+                deselect(for: answerTypeQuestionIndexPath, indexPath: indexPath)
+                answerTypeQuestionIndexPath = indexPath
+                cell.itemButton.isSelected = true
+                let selectedCategory = categories[answerTypeQuestionIndexPath?.item ?? 0]
+                viewModel.selectedAnswerType = selectedCategory.rawValue
+            }
             return cell
+        }
+    }
+    
+    private func deselect(for selectedIndexPath: IndexPath?, indexPath: IndexPath) {
+        if let selectedIndexPath, selectedIndexPath != indexPath {
+            let previousCell = collectionView.cellForItem(at: selectedIndexPath) as? TBButtonCell
+            previousCell?.itemButton.isSelected = false
         }
     }
 

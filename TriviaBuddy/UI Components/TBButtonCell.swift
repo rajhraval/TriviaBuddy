@@ -53,6 +53,7 @@ final class TBButtonCell: UICollectionViewCell {
     }
 
     @objc func selectCategory(_ sender: TBButton) {
+        itemButton.isSelected.toggle()
         didSelectItem?()
     }
 

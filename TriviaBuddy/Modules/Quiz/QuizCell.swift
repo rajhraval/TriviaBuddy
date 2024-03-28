@@ -9,7 +9,7 @@ import UIKit
 
 class QuizCell: UICollectionViewCell {
 
-    var didSelectItem: (() -> Void)?
+    var didSelectItem: ((String) -> Void)?
 
     var sections: [QuizSection] = [] {
         didSet {
@@ -121,7 +121,7 @@ extension QuizCell: UICollectionViewDataSource {
             cell.configureButton(option, color: .systemRed)
             cell.didSelectItem = { [weak self] in
                 guard let self = self else { return }
-                didSelectItem?()
+                didSelectItem?(option)
             }
             return cell
         case .boolean:
@@ -131,7 +131,7 @@ extension QuizCell: UICollectionViewDataSource {
             cell.configureButton(option, color: .systemRed)
             cell.didSelectItem = { [weak self] in
                 guard let self = self else { return }
-                didSelectItem?()
+                didSelectItem?(option)
             }
             return cell
         }
